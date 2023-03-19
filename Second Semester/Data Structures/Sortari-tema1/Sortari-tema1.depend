@@ -1,8 +1,0 @@
-# depslib dependency file v1.0
-1678813312 source:d:\facultate\structuri de date\tema1-sortari\sortari-tema1\main.cpp
-	<iostream>
-	<fstream>
-	<time.h>
-	<chrono>
-	<algorithm>
-
