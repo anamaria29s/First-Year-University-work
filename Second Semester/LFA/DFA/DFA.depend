@@ -1,0 +1,6 @@
+# depslib dependency file v1.0
+1679416113 source:d:\facultate\lfa\tema 1\dfa\main.cpp
+	<iostream>
+	<fstream>
+	<cstring>
+
