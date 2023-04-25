@@ -10,33 +10,33 @@ ofstream g("verif.out");
 
 vector<string> gramatica;
 
-bool acceptare(vector<string> gramatica, char simbol, string cuvant)
+bool acceptare(vector<string> gramatica, char S, string cuv)
 {
 
     // Verificăm dacă cuvântul este acceptat de gramatica regulată
-    if(cuvant.size()==0) //se verifica daca cuvantul null apartine gramaticii
+    if(cuv.size()==0) //Verificam daca cuvantul vid apartine gramaticii
     {
-        for (auto regula:gramatica )//verificam daca este in gramatica si are o tranzitie care sa genereze lambda
+        for (auto tranzitie:gramatica )//Verificam daca este in gramatica si are o tranzitie care sa genereze lambda
         {
-            if(regula[0]==simbol && regula.substr(3)=="lambda")
+            if(tranzitie[0]==S && tranzitie.substr(3)=="lambda")
                 return true;
 
         }
         return false;
     }
 
-    for (auto regula:gramatica)
+    for (auto tranzitie:gramatica)
     {
         // daca lungimea este mai mare ca 1 verificam daca apartine gramaticii
-        if (cuvant.size()>1 && regula[3] == cuvant[0] && regula[0] == simbol)
+        if (cuv.size()>1 && tranzitie[3] == cuv[0] && tranzitie[0] == S)
         {
-            string restcuvant = cuvant.substr(1);
-            if (acceptare(gramatica, regula[4], restcuvant))//apelam recursiv functia pentru restul cuvantului
+            string restcuvant = cuv.substr(1);
+            if (acceptare(gramatica, tranzitie[4], restcuvant))//apelam recursiv functia pentru restul cuvantului
                 return true;
 
         }
         // daca lungimea este egala cu 1 verificam daca este egala cu prima litera a cuvantului
-        else if (cuvant.size()==1 && regula[0]==simbol && regula[3]==cuvant[0])
+        else if (cuv.size()==1 && tranzitie[0]==S && tranzitie[3]==cuv[0])
             return true;
     }
 
@@ -46,30 +46,30 @@ bool acceptare(vector<string> gramatica, char simbol, string cuvant)
 }
 
 
-int reguli;
-char simbol = 'S';
-string n, cuv;
+int tranzitii;
+char S = 'S';
+string n, cuvant,cuv;
 int main()
 {
 
-    f >> reguli;
+    f >> tranzitii;
     f.ignore();
-    for (int i = 0; i < reguli; i++)
+    for (int i = 0; i < tranzitii; i++)
     {
         getline(f, n); // citim o linie intreaga din fisier (cu ajutorul functiei getline)
         gramatica.push_back(n);  // adaugam linia la finalul vectorului de reguli
     }
 
-    while (f2>>cuv)
+    while (f2>>cuvant)
     {
-        string cuvant = cuv;
-        if (acceptare(gramatica, simbol, cuvant))
-            g << "Cuvantul " << cuvant << " este acceptat de gramatica" << endl;
+        cuv = cuvant;
+        if (acceptare(gramatica, S, cuvant))
+            g << "Cuvantul " << cuv << " este acceptat de gramatica" << endl;
         else
-            g << "Cuvantul " << cuvant << " nu este acceptat de gramatica" << endl;
+            g << "Cuvantul " << cuv << " nu este acceptat de gramatica" << endl;
 
     }
 
-
     return 0;
 }
+
