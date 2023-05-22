@@ -9,35 +9,28 @@
 using namespace std;
 
 class Aroma{
-protected:
     string numeAroma;
     float pret;
 
 public:
-    Aroma (); //constructor fara parametri
-    Aroma (string numeAroma, float pret); //constructor parametrizat
+    Aroma (string,float); //constructor fara parametri
     Aroma (const Aroma&); //Copy constructor
 
     Aroma& operator= (const Aroma&); //operator egal
     friend istream& operator>> (istream&, Aroma&); //supraincarcare >>
-    friend ostream& operator<< (ostream&, Aroma&); //supraincarcare <<
+    friend ostream& operator<< (ostream&, const Aroma&); //supraincarcare <<
 
     float getPret() const {return this->pret;}
 
-    ~Aroma();
+
 };
 
-Aroma::Aroma()
+Aroma::Aroma(string numeAroma = "-", float pret = 0)
 {
-    numeAroma = "-";
-    pret=0;
+    this->numeAroma = numeAroma;
+    this->pret = pret;
 }
 
-Aroma::Aroma(string numeAroma, float pret)
-{
-    this-> numeAroma = numeAroma;
-    this-> pret = pret;
-}
 
 Aroma::Aroma(const Aroma& obj)
 {
@@ -70,28 +63,21 @@ ostream& operator <<(ostream& os, const Aroma& obj){
 }
 
 class Alergeni{
-protected:
     string numeAlergeni;
 
 public:
-    Alergeni (); //constructor fara parametri
-    Alergeni (string numeAlergeni); //constructor parametrizat
+    Alergeni (string); //constructor fara parametri
     Alergeni (const Alergeni&); //Copy constructor
 
     Alergeni& operator= (const Alergeni&); //operator egal
     friend istream& operator>> (istream&, Alergeni&); //supraincarcare >>
-    friend ostream& operator<< (ostream&, Alergeni&); //supraincarcare <<
+    friend ostream& operator<< (ostream&, const Alergeni&); //supraincarcare <<
 
 
-    ~Alergeni();
+
 };
 
-Alergeni::Alergeni()
-{
-    numeAlergeni = "-";
-}
-
-Alergeni::Alergeni(string numeAlergeni)
+Alergeni::Alergeni(string numeAlergeni = "-")
 {
     this-> numeAlergeni = numeAlergeni;
 }
@@ -121,8 +107,14 @@ ostream& operator <<(ostream& os, const Alergeni& obj){
     return os;
 }
 
+class IOinterface{
+public:
+    virtual istream& citire(istream&) = 0;
+    virtual ostream& afisare(ostream&) const = 0;
+};
 
-class Gelato{
+
+class Gelato: public IOinterface{
 protected:
     string nume;
     vector<Aroma> listaArome;
@@ -134,14 +126,97 @@ public:
     Gelato (const Gelato&);
 
     Gelato& operator= (const Gelato&);
-    friend istream& operator>> (istream&, Gelato&);
-    friend ostream& operator<< (ostream&, Gelato&);
+    istream& citire(istream& in);
+    ostream& afisare(ostream& os) const;
+    friend istream& operator>>(istream& in, Gelato& c);
+    friend ostream& operator<<(ostream& os, const Gelato& c);
 
     string getnume() {return this-> nume;}
     string getgust() {return this-> gust;}
 
-    ~Gelato();
+
+     virtual ~Gelato() {}
 };
+
+
+
+istream& Gelato::citire(istream& in)
+{
+    cout << "Introduceti numele\n";
+        in >> this->nume;
+        if(!this->listaArome.empty()){
+                this->listaArome.clear();
+        }
+        cout << "1. Add aroma\n";
+        cout << "2. Inceteaza sa adaugi\n";
+        int k;
+
+        while(cin >> k && k != 2){
+            this->listaArome.push_back(*(new Aroma()));
+            in >> this->listaArome.back();
+            cout << "1. Add aroma\n";
+            cout << "2. Inceteaza sa adaugi\n";
+        }
+
+        cout << "Introduceti gustul\n";
+        in >> this->gust;
+        return in;
+}
+
+istream& operator>>(istream& in, Gelato& g)
+{
+    return g.citire(in);
+}
+
+ostream& Gelato::afisare(ostream& os) const
+{
+    os << "Nume: " << this->nume << endl;
+        os << "Lista de arome: \n";
+        for(int i = 0; i < this->listaArome.size(); i++)
+            os << this->listaArome[i] << endl;
+        os << "Gust: " << this->gust << endl;
+        return os;
+}
+
+ostream& operator<<(ostream& out,const Gelato& g)
+{
+    return g.afisare(out);
+}
+
+Gelato::Gelato()
+{
+    nume = "-";
+    listaArome = {};
+    gust = "-";
+}
+
+Gelato::Gelato(string nume, vector<Aroma> listaArome, string gust)
+{
+    this->nume = nume;
+    this-> listaArome = listaArome;
+    this->gust = gust;
+}
+
+Gelato::Gelato(const Gelato& obj)
+{
+    this->nume = obj.nume;
+    this-> listaArome = obj.listaArome;
+    this->gust = obj.gust;
+}
+
+Gelato& Gelato::operator = (const Gelato& obj)
+{
+    if(this!=&obj)
+    {
+        this->nume = obj.nume;
+        this-> listaArome = obj.listaArome;
+        this->gust = obj.gust;
+    }
+    return *this;
+}
+
+
+
 
 class InghetataAmbalata: virtual public Gelato{
 protected:
@@ -152,9 +227,65 @@ public:
     InghetataAmbalata (const InghetataAmbalata&);
 
     InghetataAmbalata& operator= (const InghetataAmbalata&);
-    friend istream& operator>> (istream&, InghetataAmbalata&);
-    friend ostream& operator<< (ostream&, InghetataAmbalata&);
+    istream& citire (istream& in);
+    friend istream& operator>>(istream& in, InghetataAmbalata& g);
+    friend ostream& operator<<(ostream& os, const InghetataAmbalata& g);
+    ostream& afisare (ostream& os) const;
+
+    string getdataexp() {return dataexp;}
+
+
+    virtual ~InghetataAmbalata() {}
 };
+
+istream& InghetataAmbalata::citire (istream& in){
+   Gelato::citire(in);
+   // this->Gelato::citire(in);
+    cout << "Introduceti data expirarii\n";
+    in >> this->dataexp;
+    return in;
+}
+
+istream& operator>>(istream& in, InghetataAmbalata& g){
+    return g.citire(in);
+}
+
+ostream& InghetataAmbalata::afisare(ostream& os) const{
+   Gelato::afisare(os);
+   cout << "Data de expirare: " << this->dataexp <<endl;
+        return os;
+}
+
+ostream& operator<<(ostream& os, const InghetataAmbalata& g){
+   return g.afisare(os);
+}
+
+InghetataAmbalata::InghetataAmbalata(): Gelato()
+{
+    this->dataexp = "-";
+}
+
+InghetataAmbalata::InghetataAmbalata(string nume, vector<Aroma> listaArome, string gust, string dataexp):
+    Gelato(nume, listaArome,gust)
+{
+    this->dataexp = dataexp;
+}
+
+InghetataAmbalata::InghetataAmbalata(const InghetataAmbalata& obj): Gelato(obj)
+{
+   this->dataexp = obj.dataexp;
+}
+
+InghetataAmbalata& InghetataAmbalata::operator= (const InghetataAmbalata& obj)
+{
+    if(this!=&obj)
+    {
+        Gelato::operator=(obj);
+        this->dataexp=obj.dataexp;
+    }
+
+    return *this;
+}
 
 class InghetataFresh: virtual public Gelato{
 protected:
@@ -165,35 +296,302 @@ public:
     InghetataFresh (const InghetataFresh&);
 
     InghetataFresh& operator= (const InghetataFresh&);
-    friend istream& operator>> (istream&, InghetataFresh&);
-    friend ostream& operator<< (ostream&, InghetataFresh&);
+    istream& citire (istream& in);
+    friend istream& operator>>(istream& in, InghetataFresh& g);
+    friend ostream& operator<<(ostream& os, const InghetataFresh& g);
+    ostream& afisare (ostream& os) const;
+
+
+
+    virtual ~InghetataFresh() {}
 };
+
+istream& InghetataFresh::citire (istream& in){
+   Gelato::citire(in);
+   if(!this->listaAlergeni.empty()){
+                this->listaAlergeni.clear();
+        }
+        cout << "1. Add alergen\n";
+        cout << "2. Inceteaza sa adaugi\n";
+        int k;
+
+        while(cin >> k && k != 2){
+            this->listaAlergeni.push_back(*(new Alergeni()));
+            in >> this->listaAlergeni.back();
+            cout << "1. Add alergen\n";
+            cout << "2. Inceteaza sa adaugi\n";
+        }
+
+        return in;
+}
+
+istream& operator>>(istream& in, InghetataFresh& g){
+    return g.citire(in);
+}
+
+ostream& InghetataFresh::afisare(ostream& os) const{
+   Gelato::afisare(os);
+    os << "Lista de alergeni: \n";
+        list <Alergeni>::iterator it;
+        for (auto it=listaAlergeni.begin(); it!=listaAlergeni.end(); it++)
+        {
+            os<<*it<<endl;
+        }
+        return os;
+}
+
+ostream& operator<<(ostream& os, const InghetataFresh& g){
+   return g.afisare(os);
+}
+
+InghetataFresh::InghetataFresh(): Gelato()
+{
+    listaAlergeni = {};
+}
+
+InghetataFresh::InghetataFresh(string nume, vector<Aroma> listaArome, string gust, list<Alergeni> listaAlergeni): Gelato(nume, listaArome,gust)
+{
+    this->listaAlergeni = listaAlergeni;
+}
+
+InghetataFresh::InghetataFresh(const InghetataFresh& obj): Gelato(obj)
+{
+    this->listaAlergeni = obj.listaAlergeni;
+}
+
+InghetataFresh& InghetataFresh::operator= (const InghetataFresh& obj)
+{
+    if(this!=&obj)
+    {
+        Gelato::operator=(obj);
+        this-> listaAlergeni=obj.listaAlergeni;
+    }
+
+    return *this;
+}
+
 
 class Cornet:virtual public InghetataFresh{
 protected:
-    map<string,int> tipCornet;
+    string tipCornet;
 public:
-    Cornet();
-    Cornet(string nume, vector<Aroma> listaArome, string gust, list<Alergeni> listaAlergeni, map<string,int> tipCornet);
-    Cornet (const Cornet&);
 
-    Cornet& operator= (const Cornet&);
-    friend istream& operator>> (istream&, Cornet&);
-    friend ostream& operator<< (ostream&, Cornet&);
+    string getTipCornet() {return this->tipCornet;}
+    Cornet(){
+        this->tipCornet = "-";
+    }
+
+    Cornet(string nume, vector<Aroma> listaArome, string gust,list<Alergeni> listaAlergeni, string tipCornet):
+        Gelato(nume, listaArome, gust), InghetataFresh(nume, listaArome, gust, listaAlergeni){
+        this->tipCornet = tipCornet;
+    }
+
+    Cornet(const Cornet& obj): Gelato(obj), InghetataFresh(obj){
+        this->tipCornet = obj.tipCornet;
+    }
+
+    Cornet& operator =(const Cornet& obj){
+        if(this != &obj){
+            InghetataFresh::operator=(obj);
+            this->tipCornet = obj.tipCornet;
+        }
+        return *this;
+    }
+    istream& citire(istream& in) {
+        this->Gelato::citire(in);
+        cout << "Introduceti tipul de cornet\n";
+        in >> this->tipCornet;
+        return in;
+    }
+    ostream& afisare(ostream& os) const {
+        Gelato::afisare(os);
+        cout << "Cornet: " << this->tipCornet <<endl;
+        return os;
+    }
+
 };
 
 class Pahar:virtual public InghetataFresh{
 protected:
     bool lingurita;
 public:
-    Pahar();
-    Pahar(string nume, vector<Aroma> listaArome, string gust, list<Alergeni> listaAlergeni, lingurita);
-    Pahar (const Pahar&);
+    int getLingurita() {return lingurita;}
 
-    Pahar& operator= (const Pahar&);
-    friend istream& operator>> (istream&, Pahar&);
-    friend ostream& operator<< (ostream&, Pahar&);
+    Pahar(){
+        this->lingurita = 0;
+    }
+
+    Pahar(string nume, vector<Aroma> listaArome, string gust, list<Alergeni> listaAlergeni, bool lingurita):
+        Gelato(nume, listaArome, gust), InghetataFresh(nume, listaArome, gust, listaAlergeni){
+        this->lingurita = lingurita;
+    }
+
+    Pahar(const Pahar& obj): Gelato(obj), InghetataFresh(obj){
+        this->lingurita = obj.lingurita;
+    }
+
+    Pahar& operator =(const Pahar& obj){
+        if(this != &obj){
+            InghetataFresh::operator=(obj);
+            this->lingurita = obj.lingurita;
+        }
+        return *this;
+    }
+    istream& citire(istream& in) {
+        this->Gelato::citire(in);
+        cout << "Introduceti daca doriti lingurita\n";
+        in >> this->lingurita;
+        return in;
+    }
+    ostream& afisare(ostream& os) const {
+        Gelato::afisare(os);
+        cout << "Lingurita: " << this->lingurita <<endl;
+        return os;
+    }
 };
+
+class Gelaterie:public IOinterface
+{
+private:
+    int nrGelato;
+    int rating;
+    set<pair<int,string>> listaRatingGelato;
+public:
+    Gelaterie();
+    Gelaterie(int nrGelato, int rating, set<pair<int,string>> listaRatingGe);
+    Gelaterie(const Gelaterie& obj);
+    Gelaterie& operator=(const Gelaterie& obj);
+
+    istream& citire(istream& in);
+    ostream& afisare(ostream& out) const;
+    friend istream& operator>>(istream& in, Gelaterie& g);
+    friend ostream& operator<<(ostream& out, const Gelaterie& g);
+
+    ~Gelaterie();
+};
+
+Gelaterie:: Gelaterie()
+{
+    this->nrGelato = 0;
+    this->rating = 0;
+    this->listaRatingGelato = {};
+}
+
+Gelaterie:: Gelaterie(int nrGelato, int rating, set<pair<int,string>> listaRatingGelato)
+{
+    this->nrGelato = nrGelato;
+    this->rating = rating;
+    this->listaRatingGelato = listaRatingGelato;
+}
+
+Gelaterie:: Gelaterie(const Gelaterie& obj)
+{
+    this->nrGelato = obj.nrGelato;
+    this->rating = obj.rating;
+    this->listaRatingGelato = obj.listaRatingGelato;
+}
+
+Gelaterie& Gelaterie::operator= ( const Gelaterie& obj)
+{
+    if(this != &obj)
+    {
+        this->nrGelato = obj.nrGelato;
+        if (this->listaRatingGelato.empty() == 0)
+            this->listaRatingGelato.clear();
+            this->rating=obj.rating;
+        this->listaRatingGelato=obj.listaRatingGelato;
+    }
+    return *this;
+}
+istream& Gelaterie::citire(istream& in)
+{
+    if (this->listaRatingGelato.empty()==0)
+        this->listaRatingGelato.clear();
+    int p=1;
+    while (p!=0)
+    {
+        string nr;
+        cout<<"Introduceti numarul de inghetate gelato al Gelateriei."<<endl;
+        in>>nr;
+        try{
+            if(stoi(nr)){
+                  p=0;
+                  this->nrGelato=stoi(nr);
+
+            }
+            else throw(nr);
+        }catch(...){
+            cout<<"Nu ati dat o valoare buna. Incercati din nou."<<endl;
+
+        }
+    }
+
+    for( int i=0; i< this->nrGelato; i++)
+    {
+        Gelato g;
+        cout<<"Introduceti o inghetata gelato."<<endl;
+        cin>>g;
+        int p=1;
+        while(p!=0)
+        {
+            cout<<"Dati un rating pentru inghetata. "<<endl;
+            string h;
+            in>>h;
+            try{
+                if (stoi(h))
+                {
+                    p=0;
+                    this->rating=stoi(h);
+                }
+                else throw(h);
+
+            }catch(...){
+                cout<<"Nu ati dat o valoare buna."<<endl;
+
+            }
+        }
+        this->listaRatingGelato.insert(make_pair(rating,g.getnume()));
+    }
+
+    return in;
+}
+
+istream& operator>>(istream& in, Gelaterie& g)
+{
+    return g.citire(in);
+}
+
+ostream& Gelaterie::afisare(ostream& os) const
+{
+    if (this->listaRatingGelato.empty()==0)
+    {
+        os<<"Avem "<<this->nrGelato<<" inghetate disponibile in Gelaterie."<<endl;
+        os<<"------------Rating si nume----------- "<<endl;
+        for(auto it=this->listaRatingGelato.begin();it!=this->listaRatingGelato.end();it++)
+        {
+            os<<"Rating : "<<(*it).first<<";"<<" Nume : "<<(*it).second<<endl;
+            os<<endl;
+        }
+    }
+    else
+    {
+        os<<"Nu avem nicio inghetata"<<endl;
+    }
+
+    return os;
+}
+
+ostream& operator<<(ostream& os,const Gelaterie& g)
+{
+    return g.afisare(os);
+}
+
+Gelaterie::~Gelaterie()
+{
+     if (this->listaRatingGelato.empty()==0)
+        this->listaRatingGelato.clear();
+}
+
 int main()
 {
     return 0;
