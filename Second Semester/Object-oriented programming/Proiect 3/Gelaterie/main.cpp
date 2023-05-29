@@ -5,40 +5,45 @@
 #include <map>
 #include <vector>
 #include <set>
+#include <utility>
 
 using namespace std;
 
+
+template <typename A, typename P>
 class Aroma{
-    string numeAroma;
-    float pret;
+    A numeAroma;
+    P pret;
 
 public:
-    Aroma (string,float); //constructor fara parametri
+    Aroma (A numeAroma = "" ,P pret = 0);
     Aroma (const Aroma&); //Copy constructor
 
     Aroma& operator= (const Aroma&); //operator egal
     friend istream& operator>> (istream&, Aroma&); //supraincarcare >>
     friend ostream& operator<< (ostream&, const Aroma&); //supraincarcare <<
 
-    float getPret() const {return this->pret;}
-
+    P getPret() const {return this->pret;}
+    A getnumeAroma() const {return this->numeAroma;}
 
 };
 
-Aroma::Aroma(string numeAroma = "-", float pret = 0)
+template <typename A, typename P>
+Aroma<A,P>::Aroma(A numeAroma, P pret)
 {
     this->numeAroma = numeAroma;
     this->pret = pret;
 }
 
-
-Aroma::Aroma(const Aroma& obj)
+template <typename A, typename P>
+Aroma<A,P>::Aroma(const Aroma& obj)
 {
     this-> numeAroma = obj.numeAroma;
     this-> pret = obj.pret;
 }
 
-Aroma& Aroma::operator= (const Aroma& obj)
+template <typename A, typename P>
+Aroma<A,P>& Aroma<A,P>::operator= (const Aroma& obj)
 {
     if(this != &obj)
     {
@@ -48,7 +53,8 @@ Aroma& Aroma::operator= (const Aroma& obj)
     return *this;
 }
 
-istream& operator >>(istream& in, Aroma& obj){
+
+istream& operator >>(istream& in, Aroma<string,float>& obj){
     cout << "Introduceti numele aromei\n";
     in >> obj.numeAroma;
     cout << "Introduceti pretul\n";
@@ -56,7 +62,7 @@ istream& operator >>(istream& in, Aroma& obj){
     return in;
 }
 
-ostream& operator <<(ostream& os, const Aroma& obj){
+ostream& operator <<(ostream& os, const Aroma<string,float>& obj){
     os << "Nume Aroma: " << obj.numeAroma << endl;
     os << "Pret: " << obj.pret << endl;
     return os;
@@ -72,8 +78,6 @@ public:
     Alergeni& operator= (const Alergeni&); //operator egal
     friend istream& operator>> (istream&, Alergeni&); //supraincarcare >>
     friend ostream& operator<< (ostream&, const Alergeni&); //supraincarcare <<
-
-
 
 };
 
@@ -109,20 +113,19 @@ ostream& operator <<(ostream& os, const Alergeni& obj){
 
 class IOinterface{
 public:
-    virtual istream& citire(istream&) = 0;
-    virtual ostream& afisare(ostream&) const = 0;
+    virtual istream& citire(istream&) = 0; //functie virtuala pura
+    virtual ostream& afisare(ostream&) const = 0; //fct virtuala pura & metoda constanta
 };
-
 
 class Gelato: public IOinterface{
 protected:
     string nume;
-    vector<Aroma> listaArome;
+    vector<Aroma<string,float>> listaArome;
     string gust;
 
 public:
     Gelato();
-    Gelato(string nume, vector<Aroma> listaArome, string gust);
+    Gelato(string nume, vector<Aroma<string,float>> listaArome, string gust);
     Gelato (const Gelato&);
 
     Gelato& operator= (const Gelato&);
@@ -134,11 +137,30 @@ public:
     string getnume() {return this-> nume;}
     string getgust() {return this-> gust;}
 
+    template <typename T>
+    float total(const T& obj)const;
+
+    void afiseazaTotal() const;
 
      virtual ~Gelato() {}
 };
 
+template <typename T>
+float Gelato::total(const T& obj) const
+{
+    int pret2=0;
+    for(int i =0; i<obj.listaArome.size(); i++)
+    {
+        pret2+=obj.listaArome[i].getPret();
+    }
+    return pret2;
+}
 
+void Gelato::afiseazaTotal() const
+{
+    float totalpret = total(*this);
+    cout << "Total: " << totalpret << endl;
+}
 
 istream& Gelato::citire(istream& in)
 {
@@ -152,7 +174,7 @@ istream& Gelato::citire(istream& in)
         int k;
 
         while(cin >> k && k != 2){
-            this->listaArome.push_back(*(new Aroma()));
+            this->listaArome.push_back(*(new Aroma<string,float>()));
             in >> this->listaArome.back();
             cout << "1. Add aroma\n";
             cout << "2. Inceteaza sa adaugi\n";
@@ -175,6 +197,7 @@ ostream& Gelato::afisare(ostream& os) const
         for(int i = 0; i < this->listaArome.size(); i++)
             os << this->listaArome[i] << endl;
         os << "Gust: " << this->gust << endl;
+        afiseazaTotal();
         return os;
 }
 
@@ -190,7 +213,7 @@ Gelato::Gelato()
     gust = "-";
 }
 
-Gelato::Gelato(string nume, vector<Aroma> listaArome, string gust)
+Gelato::Gelato(string nume, vector<Aroma<string,float>> listaArome, string gust)
 {
     this->nume = nume;
     this-> listaArome = listaArome;
@@ -223,7 +246,7 @@ protected:
     string dataexp;
 public:
     InghetataAmbalata();
-    InghetataAmbalata(string nume, vector<Aroma> listaArome, string gust, string dataexp);
+    InghetataAmbalata(string nume, vector<Aroma<string,float>> listaArome, string gust, string dataexp);
     InghetataAmbalata (const InghetataAmbalata&);
 
     InghetataAmbalata& operator= (const InghetataAmbalata&);
@@ -233,14 +256,17 @@ public:
     ostream& afisare (ostream& os) const;
 
     string getdataexp() {return dataexp;}
-
+    float pret() const {
+    float pret = 0;
+    for(int i = 0; i < this->listaArome.size(); i++)
+        pret += this->listaArome[i].getPret();
+    return pret;}
 
     virtual ~InghetataAmbalata() {}
 };
 
 istream& InghetataAmbalata::citire (istream& in){
    Gelato::citire(in);
-   // this->Gelato::citire(in);
     cout << "Introduceti data expirarii\n";
     in >> this->dataexp;
     return in;
@@ -265,7 +291,7 @@ InghetataAmbalata::InghetataAmbalata(): Gelato()
     this->dataexp = "-";
 }
 
-InghetataAmbalata::InghetataAmbalata(string nume, vector<Aroma> listaArome, string gust, string dataexp):
+InghetataAmbalata::InghetataAmbalata(string nume, vector<Aroma<string,float>> listaArome, string gust, string dataexp):
     Gelato(nume, listaArome,gust)
 {
     this->dataexp = dataexp;
@@ -292,7 +318,7 @@ protected:
     list<Alergeni> listaAlergeni;
 public:
     InghetataFresh();
-    InghetataFresh(string nume, vector<Aroma> listaArome, string gust, list<Alergeni> listaAlergeni);
+    InghetataFresh(string nume, vector<Aroma<string,float>> listaArome, string gust, list<Alergeni> listaAlergeni);
     InghetataFresh (const InghetataFresh&);
 
     InghetataFresh& operator= (const InghetataFresh&);
@@ -300,8 +326,6 @@ public:
     friend istream& operator>>(istream& in, InghetataFresh& g);
     friend ostream& operator<<(ostream& os, const InghetataFresh& g);
     ostream& afisare (ostream& os) const;
-
-
 
     virtual ~InghetataFresh() {}
 };
@@ -349,7 +373,7 @@ InghetataFresh::InghetataFresh(): Gelato()
     listaAlergeni = {};
 }
 
-InghetataFresh::InghetataFresh(string nume, vector<Aroma> listaArome, string gust, list<Alergeni> listaAlergeni): Gelato(nume, listaArome,gust)
+InghetataFresh::InghetataFresh(string nume, vector<Aroma<string,float>> listaArome, string gust, list<Alergeni> listaAlergeni): Gelato(nume, listaArome,gust)
 {
     this->listaAlergeni = listaAlergeni;
 }
@@ -381,7 +405,7 @@ public:
         this->tipCornet = "-";
     }
 
-    Cornet(string nume, vector<Aroma> listaArome, string gust,list<Alergeni> listaAlergeni, string tipCornet):
+    Cornet(string nume, vector<Aroma<string,float>> listaArome, string gust,list<Alergeni> listaAlergeni, string tipCornet):
         Gelato(nume, listaArome, gust), InghetataFresh(nume, listaArome, gust, listaAlergeni){
         this->tipCornet = tipCornet;
     }
@@ -398,18 +422,46 @@ public:
         return *this;
     }
     istream& citire(istream& in) {
-        this->Gelato::citire(in);
-        cout << "Introduceti tipul de cornet\n";
+        this->InghetataFresh::citire(in);
+        cout << "Introduceti tipul de cornet(simplu, alune, ciocolata)\n";
         in >> this->tipCornet;
         return in;
     }
     ostream& afisare(ostream& os) const {
-        Gelato::afisare(os);
+        InghetataFresh:afisare(os);
         cout << "Cornet: " << this->tipCornet <<endl;
         return os;
     }
 
+    float pret() const {
+    float pret = 0;
+    for(int i = 0; i < this->listaArome.size(); i++)
+        pret += this->listaArome[i].getPret();
+    return pret;}
+
+    template<typename ExceptionType>
+    string detalii();
+
 };
+
+template<typename ExceptionType>
+string Cornet::detalii()
+{
+    try
+    {
+        if (this->tipCornet == "alune")
+        {
+            cout << endl << "Atentie! Neindicat pentru persoanele alergice la alune." << endl;
+        }
+        else if (this->tipCornet != "simplu" && this->tipCornet != "ciocolata" )
+            throw std::invalid_argument("Ai introdus un tip invalid de cornet.");
+    }
+    catch (const std::exception& e)
+    {
+         cout << endl << "A aparut o exceptie: " << e.what() << endl;
+    }
+    return this->tipCornet;
+}
 
 class Pahar:virtual public InghetataFresh{
 protected:
@@ -421,7 +473,7 @@ public:
         this->lingurita = 0;
     }
 
-    Pahar(string nume, vector<Aroma> listaArome, string gust, list<Alergeni> listaAlergeni, bool lingurita):
+    Pahar(string nume, vector<Aroma<string,float>> listaArome, string gust, list<Alergeni> listaAlergeni, bool lingurita):
         Gelato(nume, listaArome, gust), InghetataFresh(nume, listaArome, gust, listaAlergeni){
         this->lingurita = lingurita;
     }
@@ -438,17 +490,23 @@ public:
         return *this;
     }
     istream& citire(istream& in) {
-        this->Gelato::citire(in);
+        this->InghetataFresh::citire(in);
         cout << "Introduceti daca doriti lingurita\n";
         in >> this->lingurita;
         return in;
     }
     ostream& afisare(ostream& os) const {
-        Gelato::afisare(os);
+        InghetataFresh::afisare(os);
         cout << "Lingurita: " << this->lingurita <<endl;
         return os;
     }
+    float pret() const {
+    float pret = 0;
+    for(int i = 0; i < this->listaArome.size(); i++)
+        pret += this->listaArome[i].getPret();
+    return pret;}
 };
+
 
 class Gelaterie:public IOinterface
 {
@@ -461,13 +519,19 @@ public:
     Gelaterie(int nrGelato, int rating, set<pair<int,string>> listaRatingGe);
     Gelaterie(const Gelaterie& obj);
     Gelaterie& operator=(const Gelaterie& obj);
-
+    bool operator>(const Gelaterie& g);
     istream& citire(istream& in);
     ostream& afisare(ostream& out) const;
     friend istream& operator>>(istream& in, Gelaterie& g);
     friend ostream& operator<<(ostream& out, const Gelaterie& g);
 
-    ~Gelaterie();
+
+
+    pair<string, int> ratingMax() const;
+
+    int getRating() {return this->rating;}
+
+     ~Gelaterie();
 };
 
 Gelaterie:: Gelaterie()
@@ -503,6 +567,46 @@ Gelaterie& Gelaterie::operator= ( const Gelaterie& obj)
     }
     return *this;
 }
+
+bool Gelaterie::operator>(const Gelaterie& g)
+{
+    if (this->rating>g.rating)
+    {
+        cout<<"Primul rating este mai mare"<<endl;
+        return true;
+    }
+    return false;
+}
+
+
+pair<string, int> Gelaterie::ratingMax() const
+{
+     if (listaRatingGelato.empty()) {
+        throw runtime_error("Lista de gelato este goală.");
+    }
+
+    if (listaRatingGelato.size() == 1) {
+        const pair<int, string>& gelatoUnic = *listaRatingGelato.begin();
+        return make_pair(gelatoUnic.second, gelatoUnic.first);
+    }
+
+    const pair<int, string>* maxRatingPair = nullptr;
+    int maxRating = 0;
+
+    for (const auto& gelatoPair : listaRatingGelato) {
+        if (gelatoPair.first > maxRating) {
+            maxRating = gelatoPair.first;
+            maxRatingPair = &gelatoPair;
+        }
+    }
+
+    if (maxRatingPair == nullptr) {
+        throw runtime_error("Nu s-a găsit un rating maxim în lista de gelato.");
+    }
+
+    return make_pair(maxRatingPair->second, maxRatingPair->first);
+}
+
 istream& Gelaterie::citire(istream& in)
 {
     if (this->listaRatingGelato.empty()==0)
@@ -511,7 +615,7 @@ istream& Gelaterie::citire(istream& in)
     while (p!=0)
     {
         string nr;
-        cout<<"Introduceti numarul de inghetate gelato al Gelateriei."<<endl;
+        cout<<"Introduceti numarul de inghetate pentru care doriti sa lasati un rating."<<endl;
         in>>nr;
         try{
             if(stoi(nr)){
@@ -535,15 +639,15 @@ istream& Gelaterie::citire(istream& in)
         while(p!=0)
         {
             cout<<"Dati un rating pentru inghetata. "<<endl;
-            string h;
-            in>>h;
+            int r;
+            in >> r;
             try{
-                if (stoi(h))
+                if (r>=1 and r<=10)
                 {
                     p=0;
-                    this->rating=stoi(h);
+                    this->rating=r;
                 }
-                else throw(h);
+                else throw(r);
 
             }catch(...){
                 cout<<"Nu ati dat o valoare buna."<<endl;
@@ -592,7 +696,275 @@ Gelaterie::~Gelaterie()
         this->listaRatingGelato.clear();
 }
 
+class MeniuInteractiv{
+private:
+    static MeniuInteractiv* ob;
+    int c;
+
+    MeniuInteractiv()
+    {
+        c=0;
+    }
+public:
+    static MeniuInteractiv* getInstance()
+    {
+       if (!ob)
+           ob = new MeniuInteractiv;
+       return ob;
+    }
+
+
+
+    void meniu()
+    {
+        vector <Gelato*> listaGelato;
+        map <int, Gelaterie> listaRating;
+        int i=1;
+        int k=1;
+        while(k!=0)
+        {
+            cout << "**************************************************************************************************" << endl;
+            cout << "**************************************************************************************************" << endl;
+            cout << "                            Bine ati venit la Gelateria noastra!                                   " << endl;
+            cout << "**************************************************************************************************" << endl;
+            cout << "**************************************************************************************************" << endl;
+            cout << "                                                                                                  " << endl;
+            cout << "1. Adaugati in inventar" << endl;
+            cout << "2. Vizualizarea produselor" << endl;
+            cout << "3. Stergeti produsele" << endl;
+            cout << "4. Lasati un rating pentru o inghetata" << endl;
+            cout << "5. Aflati lista de inghetate cu rating-urile lor" << endl;
+            cout << "6. Aflati inghetata cu rating maxim" << endl;
+            cout << "7. Parasiti gelateria noastra" << endl;
+            int x = 1;
+            int optiune;
+            cout << endl << "Enter your choice: ";
+            while (x != 0)
+            {
+                int choice;
+                cin >> choice;
+                try
+                {
+                    if (choice == 1)
+                    {
+                        optiune = 1;
+                        x = 0;
+                    }
+                    else if (choice == 2)
+                    {
+                        optiune = 2;
+                        x = 0;
+                    }
+                    else if (choice == 3)
+                    {
+                        optiune = 3;
+                        x = 0;
+                    }
+                    else if (choice == 4)
+                    {
+                        optiune = 4;
+                        x = 0;
+                    }
+                    else if (choice == 5)
+                    {
+                        optiune = 5;
+                        x = 0;
+                    }
+                    else if (choice == 6)
+                    {
+                        optiune = 6;
+                        x = 0;
+                    }
+                    else if (choice == 7)
+                    {
+                        optiune = 7;
+                        x = 0;
+                    }
+                    else
+                        throw (choice);
+                }
+                catch (int y)
+                {
+                    cout << "Nu ati introdus o valoare buna." << endl;
+                }
+
+            }
+            switch (optiune)
+            {
+            case 1:
+            {
+                int l = 1;
+                while (l != 0)
+                {
+                    cout << "                                                            " << endl;
+                    cout << "               Ce doriti sa adaugati in inventar?                      " << endl;
+                    cout << "                                                            " << endl;
+                    cout << "1. Inghetata Ambalata" << endl;
+                    cout << "2. Inghetata Fresh la cornet" << endl;
+                    cout << "3. Inghetata Fresh la pahar" << endl;
+                    cout << "4. Nu doresc sa adaug nimic" << endl;
+                    int x = 1;
+                    int optiune2;
+                    while (x != 0)
+                    {
+                        int choice;
+                        cin >> choice;
+                        try
+                        {
+                            if (choice == 1)
+                            {
+                                optiune2 = 1;
+                                x = 0;
+                            }
+                            else if (choice == 2)
+                            {
+                                optiune2 = 2;
+                                x = 0;
+                            }
+                            else if (choice == 3)
+                            {
+                                optiune2 = 3;
+                                x = 0;
+                            }
+                            else if (choice == 4)
+                            {
+                                optiune2 = 4;
+                                x = 0;
+                            }
+                            else
+                                throw (choice);
+                        }
+                        catch (int y)
+                        {
+                            cout << "Nu ati introdus o valoare buna." << endl;
+                        }
+                    }
+                    switch (optiune2)
+                    {
+                    case 1:
+                    {
+                        InghetataAmbalata i;
+                        cin >> i;
+                        listaGelato.push_back(new Gelato(i));
+                        break;
+                    }
+                    case 2:
+                    {
+                        Cornet i;
+                        cin >> i;
+                        listaGelato.push_back(new Gelato(i));
+
+                        // Downcasting
+                        Cornet* cornetPtr = dynamic_cast<Cornet*>(&i);
+                        if (cornetPtr != nullptr)
+                            {
+                                // Downcasting successful
+                                cornetPtr->detalii<std::string>();
+                            }
+                        break;
+                    }
+                    case 3:
+                    {
+                        Pahar i;
+                        cin >> i;
+                        listaGelato.push_back(new Gelato(i));
+                        break;
+                    }
+                    case 4:
+                    {
+                        l = 0;
+                        break;
+                    }
+                    }
+                }
+                break;
+
+            }
+            case 2:
+                {
+                    for (int i=0; i<listaGelato.size();i++)
+                            {
+                                cout<<*listaGelato[i]<<endl;
+                            }
+                            break;
+                }
+            case 3:
+                {
+                    while (!listaGelato.empty())
+                                listaGelato.pop_back();
+                            break;
+                }
+            case 4:
+                {
+                     Gelaterie g;
+                     cin >> g;
+                     listaRating.insert(pair<int,Gelaterie> (i++,g));
+
+
+                     break;
+                }
+            case 5:
+                {
+                    map<int,Gelaterie>::iterator it;
+                    for(it=listaRating.begin(); it!=listaRating.end(); it++)
+                    {
+                        cout<<it->second<<endl;
+                    }
+                    break;
+                }
+            case 6:
+                {
+                    Gelaterie g;
+                    try
+                    {
+                        pair<string, int> maxRating;
+                        bool isFirstRating = true;
+
+                        for (const auto& entry : listaRating)
+                        {
+                            const Gelaterie& g = entry.second;
+
+                            pair<string, int> rating = g.ratingMax();
+
+                            if (isFirstRating || rating.second > maxRating.second)
+                            {
+                                maxRating = rating;
+                                isFirstRating = false;
+                            }
+                        }
+
+                        if (isFirstRating)
+                        {
+                            throw runtime_error("Nu există nicio inghetată în lista de rating.");
+                        }
+
+                        cout << "Inghetata cu rating-ul maxim este: " << endl;
+                        cout << "Nume: " << maxRating.first << endl;
+                        cout << "Rating: " << maxRating.second << endl;
+                    }
+                    catch (const runtime_error& error)
+                    {
+                        cout << "Eroare: " << error.what() << endl;
+                    }
+                    break;
+                }
+            case 7:
+                {
+                    k = 0;
+                    break;
+                }
+            }
+        }
+    }
+};
+
+MeniuInteractiv* MeniuInteractiv::ob = 0;
 int main()
 {
+    MeniuInteractiv* meniu;
+    if(meniu == NULL)
+        throw runtime_error("Eroare");
+    meniu = meniu->getInstance();
+    meniu->meniu();
     return 0;
 }
