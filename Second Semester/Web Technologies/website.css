@@ -1,0 +1,119 @@
+*{
+    margin: 0;
+    padding: 0;
+    font-family: sans-serif;
+}
+
+body {
+	background-image: url("D:/FACULTATE/Tehnici web/proiect/b12.jpg");
+    background-size: cover;
+	margin: 0;
+	padding: 0;
+}
+.navbar {
+    width: 85%;
+    margin: auto;
+    display: flex;
+    padding: 35px 0;
+    align-items: center;
+    justify-content: space-between;
+}
+.navbar li {
+    display: inline-block;
+    margin: 0 20px;
+    position: relative;
+}
+.navbar li a {
+    text-decoration: none;
+    font-size: 20px;
+    color: #249693;
+    text-transform: uppercase;
+    padding: 0 10px;
+}
+.navbar li a::after {
+    content: '';
+    height: 3px;
+    width: 0;
+    background: #1B7F7D;
+    position: absolute;
+    left: 0;
+    bottom: -10px;
+    transition: 0.5s;
+}
+.navbar li a:hover::after {
+    width: 100%;
+}
+.content h1{
+    width: 100%;
+    position: absolute;
+    top: 50%;
+    text-align: center;
+    color:#E06969;
+    background: linear-gradient(90deg, #E06969,#E06969,#0C9BA1,#0A888E, #E5808C,#E06969);
+    background-size: 400%;
+    font-size: 50px;
+    font-family: palatino, serif;
+    letter-spacing:5px;
+    transition: color 0.5s ease;
+    -webkit-text-fill-color: transparent;
+    -webkit-background-clip: text;
+    animation: animate 10s linear infinite;
+}
+
+
+.container{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 90%;
+    margin: 65px auto;
+    margin-top: 300px; 
+}
+
+.content2{
+    flex: 1;
+    width: 600px;
+    margin: 0px 25px;
+    animation: fadeInUp 2s ease;
+    margin-top: 400px; 
+}
+
+.content2 h2{
+    font-size: 35px;
+    font-family: palatino, serif;
+    margin-bottom: 20px;
+    color: #BD5656;
+}
+
+.content2 p{
+    font-size: 24px;
+    font-family: palatino, serif;
+    line-height: 1.5;
+    margin-bottom:  40px;
+    color: #BD5656;
+}
+
+
+.image{
+    flex: 1;
+    width: 600px;
+    margin: auto;
+    animation: fadeInRight 2s ease;
+    margin-top: 400px; 
+}
+
+img{
+    width: 100%;
+    height: auto;
+    border-radius: 10px;
+}
+
+@keyframes animate{
+    0%{
+        background-position: 0%;
+    }
+    100%{
+        background-position: 400%;
+    }
+}
+
