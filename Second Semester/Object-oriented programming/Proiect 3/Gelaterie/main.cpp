@@ -9,7 +9,6 @@
 
 using namespace std;
 
-
 template <typename A, typename P>
 class Aroma{
     A numeAroma;
